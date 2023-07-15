@@ -1,20 +1,38 @@
 import React, { useState, useEffect } from 'react'
+import { Link, Route, Routes } from 'react-router-dom'
+
+const PagePathsWithComponents = import.meta.glob("./pages/*.tsx", { eager: true })
+
+const routes = Object.keys(PagePathsWithComponents).map((path: string) => {
+    const name = path.match(/\.\/pages\/(.*)\.tsx$/)![1]
+    return {
+        name,
+        path: name === "Home" ? "/" : `/${name.toLowerCase()}`,
+        component: PagePathsWithComponents[path].default
+    }
+})
+
 
 export default function App() {
-    
-    const [count, setCount] = useState<number>(0)
-    const [message, setMessage] = useState<string>("")
-
-    useEffect(() => {
-        setMessage(String(Math.random()))
-    }, [count])
-
     return (
-        <div>
-            Hello :)
-            <p>Count: {count}</p>
-            <button onClick={() => setCount(count+1)}>Up count</button>
-            <p>Random num: {message}</p>
-        </div>
-    )
-}
+      <>
+        <nav>
+          <ul>
+            {routes.map(({ name, path }) => {
+              return (
+                <li key={path}>
+                  <Link to={path}>{name}</Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+        <Routes>
+          {routes.map(({ path, component: RouteComp }) => {
+            return <Route key={path} path={path} element={<RouteComp />} />;
+          })}
+        </Routes>
+      </>
+    );
+  }
+  
